@@ -1,19 +1,35 @@
 {
-  "name": "tstris",
-  "version": "0.0.0",
-  "license": "MIT",
-  "scripts": {},
-  "private": true,
-  "dependencies": {},
-  "devDependencies": {
-    "@nrwl/cli": "14.4.2",
-    "@nrwl/nx-cloud": "latest",
-    "@nrwl/workspace": "14.4.2",
-    "nx": "14.4.2",
-    "prettier": "^2.6.2",
-    "typescript": "~4.7.2"
-  },
-  "workspaces": [
-    "packages/**"
-  ]
+	"name": "tstris",
+	"version": "0.0.7",
+	"license": "MIT",
+	"author": "Isaiah Gamble <itg.2048@gmail.com>",
+	"description": "Tstris monorepo",
+	"scripts": {
+		"release": "tsx tools/scripts/release.ts"
+	},
+	"private": true,
+	"dependencies": {
+		"tslib": "^2.3.0"
+	},
+	"devDependencies": {
+		"@nrwl/cli": "14.4.2",
+		"@nrwl/devkit": "14.4.2",
+		"@nrwl/jest": "14.4.2",
+		"@nrwl/js": "14.4.2",
+		"@nrwl/nx-cloud": "latest",
+		"@nrwl/workspace": "14.4.2",
+		"@types/jest": "27.4.1",
+		"@types/node": "16.11.7",
+		"@types/yargs": "^17.0.10",
+		"eslint-config-custom": "*",
+		"jest": "27.5.1",
+		"nx": "14.4.2",
+		"prettier": "2.6.2",
+		"ts-jest": "27.1.4",
+		"ts-node": "~10.8.0",
+		"tsx": "~3.8.0",
+		"typescript": "~4.7.2",
+		"yargs": "17.5.1"
+	},
+	"packageManager": "pnpm@7.5.1"
 }

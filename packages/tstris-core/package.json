@@ -1,0 +1,23 @@
+{
+	"name": "@tstris/core",
+	"version": "0.0.7",
+	"description": "Low level implementation of t*tris for browser and node.js",
+	"license": "MIT",
+	"author": "Isaiah Gamble <itg.2048@gmail.com>",
+	"types": "./lib/index.d.ts",
+	"module": "./lib/index.mjs",
+	"main": "./lib/index.js",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsup",
+		"dev": "tsup --watch"
+	},
+	"keywords": [],
+	"devDependencies": {
+		"tsup": "6.1.3",
+		"eslint-config-custom": "*",
+		"typescript": "~4.7.2"
+	}
+}
