@@ -21,6 +21,7 @@
 		"@types/jest": "27.4.1",
 		"@types/node": "16.11.7",
 		"@types/yargs": "^17.0.10",
+		"eslint": "8.19.0",
 		"eslint-config-custom": "*",
 		"jest": "27.5.1",
 		"nx": "14.4.2",
