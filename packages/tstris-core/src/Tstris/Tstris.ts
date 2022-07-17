@@ -57,6 +57,7 @@ export const DEFAULT_PIECE_TYPES = {
 export const DEFAULT_OPTIONS: DefaultOptions<Record<DefaultPieceTypes, PieceTypeDefinition<DefaultPieceTypes>>> = {
 	pieceTypes: DEFAULT_PIECE_TYPES,
 	nextQueueSize: 3,
+	resetOnHold: true,
 	hold: true,
 	width: 10,
 	height: 20,
@@ -68,13 +69,13 @@ export const DEFAULT_OPTIONS: DefaultOptions<Record<DefaultPieceTypes, PieceType
  * Represents a game instance
  */
 export class Tstris<
-	PieceTypes extends Record<string, PieceTypeDefinition<string>> = Record<
+	PieceTypes extends Record<string | '', PieceTypeDefinition<string>> = Record<
 		DefaultPieceTypes,
 		PieceTypeDefinition<DefaultPieceTypes>
 	>,
 > {
 	private events: Map<keyof TstrisEventMap<PieceTypes>, (...args: any[]) => void>;
-	private board: PieceTypes[][];
+	private board: (keyof PieceTypes)[][];
 	private player: Player<PieceTypes>;
 	private options: InternalOptions<PieceTypes>;
 	private isPlaying = false;
@@ -85,6 +86,9 @@ export class Tstris<
 	 * @param options Options for the new instance, not required
 	 */
 	constructor(options: TstrisOptions<PieceTypes> = {}) {
+		// make copy of provided default board if it exists
+		options.defaultBoard = options.defaultBoard?.map((row) => row.slice(0));
+
 		this.options = {
 			...DEFAULT_OPTIONS,
 			...options,
@@ -95,6 +99,7 @@ export class Tstris<
 			options.defaultBoard ||
 			this.generateDefaultBoard();
 		this.player = new Player<PieceTypes>(this, this.options);
+		return this;
 	}
 
 	start() {
@@ -133,11 +138,31 @@ export class Tstris<
 	}
 
 	/**
-	 * Get a copy of the current game board
+	 * Get a copy of the current game board, only shows placed pieces, not the player piece
 	 * @returns A copy of the current game board
 	 */
 	getBoard() {
 		return this.board.map((row) => row.slice(0));
+	}
+
+	/**
+	 * Get a copy of the board with player piece rendered as well
+	 * @returns A copy of current board with the player rendered
+	 */
+	getBoardWithPlayer() {
+		const currBoard = this.getBoard();
+
+		// technically possible
+		if (!this.player.currPiece) return currBoard;
+
+		// renders piece onto board
+		this.player.currPiece.shape.forEach((row, y) => row.forEach((value, x) => {
+			if (value !== '') {
+				currBoard[y + this.player.pos.y][x + this.player.pos.x] = value
+			}
+		}));
+
+		return currBoard;
 	}
 
 	private generateDefaultBoard () {

@@ -9,6 +9,6 @@ export default defineConfig((options) => {
 		clean: true,
 		dts: true,
 		format: ['esm', 'cjs'],
-		target: 'es6',
+		target: 'es2015',
 	};
 });

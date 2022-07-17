@@ -10,6 +10,8 @@ describe('Tstris Player', () => {
 			new Tstris(),
 			DEFAULT_OPTIONS,
 		);
+		// initialize with random pieces
+		player.start();
 	});
 
 	describe('Player.rotate', () => {
@@ -47,6 +49,27 @@ describe('Tstris Player', () => {
 				['', '', '', ''],
 				['', '', '', ''],
 			]);
+		});
+	});
+
+	describe('Player.hold', () => {
+		it('Should put curr piece in hold and get next piece if hold is empty', () => {
+			const currPiece = player.currPiece;
+			const nextInQueue = player.nextPieces[0];
+			player.hold();
+			expect(player.heldPiece).toBe(currPiece);
+			expect(player.currPiece).toBe(nextInQueue);
+		});
+
+		it('Should swap curr piece with held piece if there is one', () => {
+			player.hold();
+			const currPiece = player.currPiece;
+			const heldPiece = player.heldPiece;
+			player.hold();
+
+			// they should swap
+			expect(player.currPiece).toBe(heldPiece);
+			expect(player.heldPiece).toBe(currPiece);
 		});
 	});
 });

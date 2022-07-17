@@ -1,5 +1,5 @@
 module.exports = {
-	extends: ['custom'],
+	extends: ['tstris'],
 	root: false,
 	env: {
 		node: true,
