@@ -5,7 +5,7 @@ export default defineConfig((options) => {
 		minify: !options.watch,
 		sourcemap: !options.watch,
 		entry: ['src/index.ts'],
-		outDir: '../../dist/packages/tstris-core/lib',
+		outDir: !options.watch ? '../../dist/packages/tstris-core/lib' : './lib',
 		clean: true,
 		dts: true,
 		format: ['esm', 'cjs'],

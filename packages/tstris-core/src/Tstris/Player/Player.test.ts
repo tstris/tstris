@@ -3,12 +3,15 @@ import { DefaultPieceTypes, PieceTypeDefinition } from '../types';
 import { Player } from './Player';
 
 describe('Tstris Player', () => {
+	let tstris: Tstris;
 	let player: Player<Record<DefaultPieceTypes, PieceTypeDefinition<DefaultPieceTypes>>>;
 
 	beforeEach(() => {
+		tstris = new Tstris();
 		player = new Player<Record<DefaultPieceTypes, PieceTypeDefinition<DefaultPieceTypes>>>(
-			new Tstris(),
+			tstris,
 			DEFAULT_OPTIONS,
+			tstris.getBoard(),
 		);
 		// initialize with random pieces
 		player.start();
@@ -42,7 +45,7 @@ describe('Tstris Player', () => {
 		});
 
 		it('Should not mutate input array', () => {
-			const rotated = player.rotate(iPiece, 'left');
+			player.rotate(iPiece, 'left');
 			expect(iPiece).toEqual([
 				['', '', '', ''],
 				['I', 'I', 'I', 'I'],

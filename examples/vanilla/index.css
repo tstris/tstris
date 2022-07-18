@@ -1,0 +1,9 @@
+#board {
+	display: grid;
+	grid-template-rows: repeat(20, calc(25vw / 10));
+	grid-template-columns: repeat(10, 1fr);
+	grid-gap: 1px;
+	border: 2px solid #333;
+	width: 100%;
+	max-width: 25vw;
+}

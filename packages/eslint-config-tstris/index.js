@@ -16,6 +16,7 @@ module.exports = {
 	rules: {
 		'react/display-name': 'off',
 		'@typescript-eslint/no-explicit-any': 'off',
+		'@typescript-eslint/no-unused-vars': 'error',
 		'@typescript-eslint/no-empty-interface': 'off',
 		'@typescript-eslint/no-unnecessary-type-constraint': 'off',
 		'@typescript-eslint/ban-types': 'off',
