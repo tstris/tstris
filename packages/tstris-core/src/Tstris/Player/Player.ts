@@ -8,7 +8,7 @@ export class Player<PieceTypes extends Record<string, PieceTypeDefinition<string
 	public heldPiece?: PlayerPiece<PieceTypes>;
 	public nextPieces: PlayerPiece<PieceTypes>[];
 	public pos: { x: number; y: number };
-	public collided = false;
+	public collided = 0;
 
 	constructor(
 		private tstris: Tstris<PieceTypes>,
@@ -39,13 +39,13 @@ export class Player<PieceTypes extends Record<string, PieceTypeDefinition<string
 		// hopefully does'nt break anything
 		this.currPiece = { shape: [[]] as any, type: '' };
 		this.pos = { x: this.options.width / 2 - 2, y: 0 };
-		this.collided = false;
+		this.collided = 0;
 	}
 
 	/** Call after player piece is placed or hold is activated */
 	resetPlayer({ afterHold = true }) {
 		this.pos = { x: this.options.width / 2 - 2, y: 0 };
-		this.collided = false;
+		this.collided = 0;
 
 		// getNextPiece handles no queue case and replacing taken piece
 		// if called after hold() do not get next piece
@@ -90,11 +90,11 @@ export class Player<PieceTypes extends Record<string, PieceTypeDefinition<string
 	}
 
 	/**
-	 * Moves player by x and y and updates their collision status
+	 * Moves player by x and y and increments collision
 	 */
-	updatePos({ x, y, collided }: { x: number; y: number; collided: boolean }) {
+	updatePos({ x, y, collided }: { x: number; y: number; collided: number }) {
 		this.pos = { x: this.pos.x + x, y: this.pos.y + y };
-		this.collided = collided;
+		this.collided += collided;
 	}
 
 	/**
@@ -114,13 +114,13 @@ export class Player<PieceTypes extends Record<string, PieceTypeDefinition<string
 	 */
 	drop() {
 		if (!this.checkCollision({ x: 0, y: 1 })) {
-			this.updatePos({ x: 0, y: 1, collided: false });
+			this.updatePos({ x: 0, y: 1, collided: 0 });
 		} else {
 			// game over
 			if (this.pos.y < 1) {
 				return true;
 			}
-			this.updatePos({ x: 0, y: 0, collided: true });
+			this.updatePos({ x: 0, y: 0, collided: 1 });
 		}
 		return false;
 	}
@@ -150,7 +150,7 @@ export class Player<PieceTypes extends Record<string, PieceTypeDefinition<string
 	moveHorizontal(dir: 'left' | 'right') {
 		const dirNumber = dir === 'left' ? -1 : 1;
 		if (!this.checkCollision({ x: dirNumber, y: 0 })) {
-			this.updatePos({ x: dirNumber, y: 0, collided: false });
+			this.updatePos({ x: dirNumber, y: 0, collided: 0 });
 		}
 	}
 

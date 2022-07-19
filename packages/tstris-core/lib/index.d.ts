@@ -36,6 +36,8 @@ interface TstrisOptions<PieceTypes extends Record<string, PieceTypeDefinition<st
     hold?: boolean;
     /** Level that the game will begin at, defaults to 1 */
     startLevel?: number;
+    /** Number of times a piece can collide before being placed, higher is more lenient, defaults to 3 */
+    placementCollisions?: number;
     /**
      * How the board should start for this game instance, should align with width and height provided to options
      */
@@ -134,6 +136,8 @@ declare class Tstris<PieceTypes extends Record<string | '', PieceTypeDefinition<
     moveLeft(): void;
     /** Moves player down 1 cell and checks if they lost the game */
     softDrop(): void;
+    /** Moves player down and instantly places piece */
+    hardDrop(): void;
     /** Switches current piece with held piece or places current piece in hold and gets next piece */
     hold(): void;
     /** Rotates current piece to the right */
@@ -172,6 +176,8 @@ declare class Tstris<PieceTypes extends Record<string | '', PieceTypeDefinition<
     private startLoop;
     /** Stops game loop */
     private stopLoop;
+    /** Resets loop to make it wait whole interval again */
+    private resetLoop;
     private gameLoop;
     /** Checks for if rows were cleared and if player position needs to be adjusted, call after any moves */
     private updateBoard;

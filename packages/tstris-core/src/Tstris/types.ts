@@ -36,6 +36,8 @@ export interface TstrisOptions<PieceTypes extends Record<string, PieceTypeDefini
 	hold?: boolean;
 	/** Level that the game will begin at, defaults to 1 */
 	startLevel?: number;
+	/** Number of times a piece can collide before being placed, higher is more lenient, defaults to 3 */
+	placementCollisions?: number;
 	/**
 	 * How the board should start for this game instance, should align with width and height provided to options
 	 */
@@ -47,6 +49,7 @@ export type HasDefault =
 	| 'height'
 	| 'width'
 	| 'startLevel'
+	| 'placementCollisions'
 	| 'speedFunction'
 	| 'scoreFunction'
 	| 'levelFunction'

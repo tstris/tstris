@@ -85,6 +85,7 @@ export const DEFAULT_OPTIONS: DefaultOptions<
 	hold: true,
 	width: 10,
 	height: 20,
+	placementCollisions: 3,
 	speedFunction: DEFAULT_SPEED_FUNCTION,
 	scoreFunction: DEFAULT_SCORE_FUNCTION,
 	levelFunction: DEFAULT_LEVEL_FUNCTION,
@@ -226,11 +227,20 @@ export class Tstris<
 
 	/** Moves player down 1 cell and checks if they lost the game */
 	softDrop() {
-		// temporarily stop default dropping when soft dropping
-		this.stopLoop();
 		if (this.player.drop()) this.end();
 		this.updateBoard();
-		this.startLoop();
+		this.resetLoop();
+	}
+
+	/** Moves player down and instantly places piece */
+	hardDrop() {
+		while (this.player.collided <= 0) {
+			if (this.player.drop()) this.end();
+		}
+		// set to placement threshold immediately
+		this.player.collided = this.options.placementCollisions;
+		this.updateBoard();
+		this.resetLoop();
 	}
 
 	/** Switches current piece with held piece or places current piece in hold and gets next piece */
@@ -271,6 +281,7 @@ export class Tstris<
 	private startLoop() {
 		if (this.loopStatus === 'running') return;
 		this.loopStatus = 'running';
+		this.lastLoopRun = Date.now();
 		this.interval = setInterval(this.gameLoop.bind(this), 0) as any;
 	}
 
@@ -278,6 +289,11 @@ export class Tstris<
 	private stopLoop() {
 		this.loopStatus = 'stopped';
 		clearInterval(this.interval);
+	}
+
+	/** Resets loop to make it wait whole interval again */
+	private resetLoop() {
+		this.lastLoopRun = Date.now();
 	}
 
 	private gameLoop() {
@@ -303,7 +319,7 @@ export class Tstris<
 	/** Checks for if rows were cleared and if player position needs to be adjusted, call after any moves */
 	private updateBoard() {
 		// then check if we collided or just update the board
-		if (this.player.collided) {
+		if (this.player.collided >= this.options.placementCollisions) {
 			dispatchEvent(this.events, 'piecePlaced', {
 				type: this.player.currPiece.type as string,
 			});

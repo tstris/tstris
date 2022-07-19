@@ -39,7 +39,7 @@ var Player = class {
     this.tstris = tstris;
     this.options = options;
     this.board = board;
-    this.collided = false;
+    this.collided = 0;
     this.nextPieces = Array(options.nextQueueSize);
     this.pos = { x: 0, y: 0 };
   }
@@ -58,11 +58,11 @@ var Player = class {
     this.nextPieces = Array(this.options.nextQueueSize);
     this.currPiece = { shape: [[]], type: "" };
     this.pos = { x: this.options.width / 2 - 2, y: 0 };
-    this.collided = false;
+    this.collided = 0;
   }
   resetPlayer({ afterHold = true }) {
     this.pos = { x: this.options.width / 2 - 2, y: 0 };
-    this.collided = false;
+    this.collided = 0;
     if (!afterHold)
       this.currPiece = this.getNextPiece();
   }
@@ -101,7 +101,7 @@ var Player = class {
   }
   updatePos({ x, y, collided }) {
     this.pos = { x: this.pos.x + x, y: this.pos.y + y };
-    this.collided = collided;
+    this.collided += collided;
   }
   rotate(shape, dir) {
     const rotatedPiece = shape.map((_, index) => shape.map((col) => col[index]));
@@ -111,12 +111,12 @@ var Player = class {
   }
   drop() {
     if (!this.checkCollision({ x: 0, y: 1 })) {
-      this.updatePos({ x: 0, y: 1, collided: false });
+      this.updatePos({ x: 0, y: 1, collided: 0 });
     } else {
       if (this.pos.y < 1) {
         return true;
       }
-      this.updatePos({ x: 0, y: 0, collided: true });
+      this.updatePos({ x: 0, y: 0, collided: 1 });
     }
     return false;
   }
@@ -135,7 +135,7 @@ var Player = class {
   moveHorizontal(dir) {
     const dirNumber = dir === "left" ? -1 : 1;
     if (!this.checkCollision({ x: dirNumber, y: 0 })) {
-      this.updatePos({ x: dirNumber, y: 0, collided: false });
+      this.updatePos({ x: dirNumber, y: 0, collided: 0 });
     }
   }
   getNextPiece() {
@@ -226,6 +226,7 @@ var DEFAULT_OPTIONS = {
   hold: true,
   width: 10,
   height: 20,
+  placementCollisions: 3,
   speedFunction: DEFAULT_SPEED_FUNCTION,
   scoreFunction: DEFAULT_SCORE_FUNCTION,
   levelFunction: DEFAULT_LEVEL_FUNCTION,
@@ -292,11 +293,19 @@ var Tstris = class {
     this.updateBoard();
   }
   softDrop() {
-    this.stopLoop();
     if (this.player.drop())
       this.end();
     this.updateBoard();
-    this.startLoop();
+    this.resetLoop();
+  }
+  hardDrop() {
+    while (this.player.collided <= 0) {
+      if (this.player.drop())
+        this.end();
+    }
+    this.player.collided = this.options.placementCollisions;
+    this.updateBoard();
+    this.resetLoop();
   }
   hold() {
     if (this.holdUsed || !this.options.hold)
@@ -324,11 +333,15 @@ var Tstris = class {
     if (this.loopStatus === "running")
       return;
     this.loopStatus = "running";
+    this.lastLoopRun = Date.now();
     this.interval = setInterval(this.gameLoop.bind(this), 0);
   }
   stopLoop() {
     this.loopStatus = "stopped";
     clearInterval(this.interval);
+  }
+  resetLoop() {
+    this.lastLoopRun = Date.now();
   }
   gameLoop() {
     if (this.lastLoopRun > Date.now() - this.options.speedFunction(this.level))
@@ -344,7 +357,7 @@ var Tstris = class {
     this.lastLoopRun = Date.now();
   }
   updateBoard() {
-    if (this.player.collided) {
+    if (this.player.collided >= this.options.placementCollisions) {
       dispatchEvent(this.events, "piecePlaced", {
         type: this.player.currPiece.type
       });
