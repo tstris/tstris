@@ -57,6 +57,7 @@ var Player = class {
     this.heldPiece = void 0;
     this.nextPieces = Array(this.options.nextQueueSize);
     this.currPiece = { shape: [[]], type: "" };
+    this.heldPiece = void 0;
     this.pos = { x: this.options.width / 2 - 2, y: 0 };
     this.collided = 0;
   }

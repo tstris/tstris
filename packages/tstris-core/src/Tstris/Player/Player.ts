@@ -38,6 +38,7 @@ export class Player<PieceTypes extends Record<string, PieceTypeDefinition<string
 		this.nextPieces = Array(this.options.nextQueueSize);
 		// hopefully does'nt break anything
 		this.currPiece = { shape: [[]] as any, type: '' };
+		this.heldPiece = undefined;
 		this.pos = { x: this.options.width / 2 - 2, y: 0 };
 		this.collided = 0;
 	}
