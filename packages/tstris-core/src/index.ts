@@ -1,1 +1,1 @@
-export { Tstris } from './Tstris';
+export * from './Tstris';

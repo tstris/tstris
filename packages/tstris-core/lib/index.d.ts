@@ -2,6 +2,10 @@ declare type DefaultPieceTypes = 'O' | 'I' | 'J' | 'L' | 'Z' | 'S' | 'T' | '';
 declare type PieceTypeDefinition<T extends string, E extends object = {}> = {
     shape: (T | '')[][];
 } & E;
+declare type PlayerPiece<PieceTypes extends Record<string, PieceTypeDefinition<string>>> = {
+    shape: (keyof PieceTypes)[][];
+    type: keyof PieceTypes;
+};
 interface TstrisOptions<PieceTypes extends Record<string, PieceTypeDefinition<string>>> {
     /** Types of cells that will be available in the game instance */
     pieceTypes?: PieceTypes | Record<string, PieceTypeDefinition<string>>;
@@ -186,4 +190,4 @@ declare class Tstris<PieceTypes extends Record<string | '', PieceTypeDefinition<
     private generateDefaultBoard;
 }
 
-export { Tstris };
+export { DefaultPieceTypes, PieceTypeDefinition, PlayerPiece, Tstris, TstrisEvent, TstrisEventMap, TstrisOptions };
