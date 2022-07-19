@@ -1,4 +1,4 @@
-import { DEFAULT_OPTIONS, DEFAULT_PIECE_TYPES, Tstris } from '../Tstris';
+import { DEFAULT_PIECE_TYPES, Tstris } from '../Tstris';
 import { DefaultPieceTypes, PieceTypeDefinition } from '../types';
 import { Player } from './Player';
 
@@ -8,11 +8,7 @@ describe('Tstris Player', () => {
 
 	beforeEach(() => {
 		tstris = new Tstris();
-		player = new Player<Record<DefaultPieceTypes, PieceTypeDefinition<DefaultPieceTypes>>>(
-			tstris,
-			DEFAULT_OPTIONS,
-			tstris.getBoard(),
-		);
+		player = tstris['player'];
 		// initialize with random pieces
 		player.start();
 	});
