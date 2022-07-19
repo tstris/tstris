@@ -8,8 +8,10 @@ const next = document.getElementById('next');
 const score = document.getElementById('score');
 const level = document.getElementById('level');
 
+score.innerHTML = tstris.score;
+level.innerHTML = tstris.level;
+
 const move = ({ keyCode }) => {
-	console.log(keyCode)
 	if (tstris.status !== 'ended') {
 		if (keyCode === 37) {
 			tstris.moveLeft();
@@ -18,7 +20,15 @@ const move = ({ keyCode }) => {
 		} else if (keyCode === 40) {
 			tstris.softDrop();
 		} else if (keyCode === 38) {
-			console.log('rotate!');
+			tstris.rotateRight();
+		} else if (keyCode === 67) {
+			tstris.hold();
+		} else if (keyCode === 90) {
+			tstris.rotateLeft();
+		} else if (keyCode === 88) {
+			tstris.rotateRight();
+		} else if (keyCode === 32) {
+			tstris.hardDrop();
 		}
 	}
 };
@@ -54,11 +64,41 @@ tstris.on('update', () => {
 		...flattenedBoard.map((cell) => {
 			const cellEl = document.createElement('div');
 			cellEl.style.background = getColor(cell);
-			cellEl.style.border = '1px solid black';
+			cellEl.style.border = '0.5px solid black';
 			cellEl.style.margin = '0';
 			return cellEl;
 		}),
 	);
+});
+
+tstris.on('scoreChange', ({ newScore }) => {
+	score.innerHTML = newScore;
+});
+
+tstris.on('levelChange', ({ newLevel }) => {
+	level.innerHTML = newLevel;
+});
+
+tstris.on('queueChange', ({ queue }) => {
+	next.textContent = '';
+	next.append(
+		...queue.map((piece) => {
+			const cellEl = document.createElement('div');
+			cellEl.innerHTML = piece;
+			cellEl.style.border = '0.5px solid black';
+			cellEl.style.margin = '16px';
+			return cellEl;
+		}),
+	);
+});
+
+tstris.on('hold', ({ next }) => {
+	hold.innerText = next;
+});
+
+document.getElementById('restart')?.addEventListener('click', () => {
+	tstris.reset();
+	tstris.start();
 });
 
 tstris.start();

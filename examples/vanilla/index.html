@@ -6,12 +6,22 @@
 		<script src="main.js" type="module" defer></script>
 	</head>
 	<body>
-		<div id="board"></div>
-		<div id="info">
-			<p id="hold"></p>
-			<div id="next"></div>
-			<p id="score"></p>
-			<p id="level"></p>
+		<div class="container">
+			<div>
+				<h2>HOLD</h2>
+				<p id="hold" style="background-color: grey; color: white;"></p>
+			</div>
+			<div id="board"></div>
+			<div id="info">
+				<h2>INFO</h2>
+				<h3>Next</h3>
+				<div id="next"></div>
+				<h3>Score</h3>
+				<p id="score"></p>
+				<h3>Level</h3>
+				<p id="level"></p>
+			</div>
 		</div>
+		<button id="restart">restart</button>
 	</body>
 </html>

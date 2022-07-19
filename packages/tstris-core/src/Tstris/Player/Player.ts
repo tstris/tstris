@@ -1,4 +1,5 @@
 import { getRandomKey } from '../../utils/getRandomKey';
+import { dispatchEvent } from '../dispatchEvent';
 import { Tstris } from '../Tstris';
 import { InternalOptions, PieceTypeDefinition, PlayerPiece } from '../types';
 
@@ -20,12 +21,16 @@ export class Player<PieceTypes extends Record<string, PieceTypeDefinition<string
 	}
 
 	start() {
+		this.pos = { x: this.options.width / 2 - 2, y: 0 };
 		this.currPiece = this.getRandomPiece();
 
 		// populate next queue
 		for (let i = 0; i < this.options.nextQueueSize; i += 1) {
 			this.nextPieces[i] = this.getRandomPiece();
 		}
+		dispatchEvent(this.tstris.getEventMap(), 'queueChange', {
+			queue: this.nextPieces.map((piece) => piece.type) as string[],
+		});
 	}
 
 	reset() {
@@ -40,6 +45,7 @@ export class Player<PieceTypes extends Record<string, PieceTypeDefinition<string
 	/** Call after player piece is placed or hold is activated */
 	resetPlayer({ afterHold = true }) {
 		this.pos = { x: this.options.width / 2 - 2, y: 0 };
+		this.collided = false;
 
 		// getNextPiece handles no queue case and replacing taken piece
 		// if called after hold() do not get next piece
@@ -52,12 +58,35 @@ export class Player<PieceTypes extends Record<string, PieceTypeDefinition<string
 		if (!this.heldPiece) {
 			this.heldPiece = this.currPiece;
 			this.currPiece = this.getNextPiece();
-			return;
+		} else {
+			const tmp = this.heldPiece;
+			this.heldPiece = this.currPiece;
+			this.currPiece = tmp;
 		}
-		const tmp = this.heldPiece;
-		this.heldPiece = this.currPiece;
-		this.currPiece = tmp;
 		if (this.options.resetOnHold) this.resetPlayer({ afterHold: true });
+		dispatchEvent(this.tstris.getEventMap(), 'hold', {
+			previous: this.currPiece.type as string,
+			next: this.heldPiece?.type as string,
+		});
+	}
+
+	rotatePiece(dir: 'left' | 'right') {
+		this.currPiece.shape = this.rotate(this.currPiece.shape as string[][], dir);
+
+		const startingX = this.pos.x;
+		let offset = 1;
+		while (this.checkCollision({ x: 0, y: 0 })) {
+			this.pos.x += offset;
+			offset = -(offset + (offset > 0 ? 1 : -1));
+			if (offset > this.currPiece.shape[0].length) {
+				this.currPiece.shape = this.rotate(
+					this.currPiece.shape as string[][],
+					dir === 'left' ? 'right' : 'left',
+				);
+				this.pos.x = startingX;
+				return;
+			}
+		}
 	}
 
 	/**
@@ -137,13 +166,22 @@ export class Player<PieceTypes extends Record<string, PieceTypeDefinition<string
 		// length was reduced by shift so this is fine to do
 		if (this.options.nextQueueSize > 0) this.nextPieces.push(this.getRandomPiece());
 
-		return nextPiece ?? this.getRandomPiece();
+		const returned = nextPiece ?? this.getRandomPiece();
+
+		if (this.tstris.status === 'playing')
+			dispatchEvent(this.tstris.getEventMap(), 'queueChange', {
+				queue: this.nextPieces.map((piece) => piece.type) as string[],
+			});
+
+		return returned;
 	}
 
 	private getRandomPiece() {
 		const randPiece = getRandomKey(this.options.pieceTypes);
 		return {
-			shape: this.options.pieceTypes[randPiece].shape as (keyof PieceTypes)[][],
+			shape: this.options.pieceTypes[randPiece].shape.map((row) =>
+				row.slice(0),
+			) as (keyof PieceTypes)[][],
 			type: randPiece as keyof PieceTypes,
 		};
 	}

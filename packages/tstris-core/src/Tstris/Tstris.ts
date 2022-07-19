@@ -1,4 +1,5 @@
 import { Player } from './Player';
+import { dispatchEvent } from './dispatchEvent';
 import {
 	PieceTypeDefinition,
 	DefaultPieceTypes,
@@ -70,6 +71,11 @@ export const DEFAULT_SCORE_FUNCTION = () => {
 	return 10;
 };
 
+// TODO
+export const DEFAULT_LEVEL_FUNCTION = () => {
+	return 1;
+};
+
 export const DEFAULT_OPTIONS: DefaultOptions<
 	Record<DefaultPieceTypes, PieceTypeDefinition<DefaultPieceTypes>>
 > = {
@@ -81,6 +87,7 @@ export const DEFAULT_OPTIONS: DefaultOptions<
 	height: 20,
 	speedFunction: DEFAULT_SPEED_FUNCTION,
 	scoreFunction: DEFAULT_SCORE_FUNCTION,
+	levelFunction: DEFAULT_LEVEL_FUNCTION,
 	startLevel: 1,
 };
 
@@ -105,6 +112,7 @@ export class Tstris<
 	/** setInterval id */
 	private interval?: number;
 	private loopStatus: 'running' | 'stopped' = 'stopped';
+	public holdUsed = false;
 	public level: number;
 	public rowsCleared = 0;
 	public score = 0;
@@ -225,7 +233,35 @@ export class Tstris<
 		this.startLoop();
 	}
 
-	/** Ensure this instance and its player use same reference */
+	/** Switches current piece with held piece or places current piece in hold and gets next piece */
+	hold() {
+		if (this.holdUsed || !this.options.hold) return;
+		this.player.hold();
+		this.updateBoard();
+		this.holdUsed = true;
+	}
+
+	/** Rotates current piece to the right */
+	rotateRight() {
+		this.player.rotatePiece('right');
+		this.updateBoard();
+	}
+
+	/** Rotates current piece to the left */
+	rotateLeft() {
+		this.player.rotatePiece('left');
+		this.updateBoard();
+	}
+
+	getEventMap() {
+		return new Map(this.events);
+	}
+
+	/**
+	 * Ensure this instance and its player use same reference
+	 *
+	 * **For Internal use only**
+	 */
 	private setBoard(value: (keyof PieceTypes)[][]) {
 		this.board = value;
 		this.player.board = value;
@@ -248,9 +284,9 @@ export class Tstris<
 		// Only run loop if enough time has passed since last run
 		// This allows for dynamic loop length not usually possible in vanilla context
 		if (this.lastLoopRun > Date.now() - this.options.speedFunction(this.level)) return;
-		const loopStart = Date.now();
+		//const loopStart = Date.now();
 
-		const prevented = this.dispatchEvent('naturalDrop', { cell: true });
+		const prevented = dispatchEvent(this.events, 'naturalDrop', { cell: true });
 		if (prevented) return;
 
 		// when drop returns true, the game is over because of overflow
@@ -260,7 +296,7 @@ export class Tstris<
 			return this.end();
 		}
 
-		console.log('loop time:', Date.now() - loopStart);
+		//console.log('loop time:', Date.now() - loopStart);
 		this.lastLoopRun = Date.now();
 	}
 
@@ -268,23 +304,30 @@ export class Tstris<
 	private updateBoard() {
 		// then check if we collided or just update the board
 		if (this.player.collided) {
+			dispatchEvent(this.events, 'piecePlaced', {
+				type: this.player.currPiece.type as string,
+			});
 			this.setBoard(this.handleClearedRows(this.getBoardWithPlayer()));
 			this.player.resetPlayer({ afterHold: false });
+			// hold resets after a piece is placed
+			this.holdUsed = false;
 		} else {
 			this.setBoard(this.getBoard());
 		}
 
-		this.dispatchEvent('update', {});
+		dispatchEvent(this.events, 'update', {});
 	}
 
 	/** Finds cleared rows and replaces them, also dispatches rowCleared event and calls scoreFunction */
 	private handleClearedRows(newBoard: (keyof PieceTypes)[][]) {
 		let rowsCleared = 0;
+		const rowIndexes: number[] = [];
 
 		// find which rows are cleared and instead of adding them to back to ack, add new row to top
-		const withClearedRows = newBoard.reduce<(keyof PieceTypes)[][]>((ack, row) => {
+		const withClearedRows = newBoard.reduce<(keyof PieceTypes)[][]>((ack, row, i) => {
 			if (row.findIndex((cell) => cell === '') === -1) {
 				rowsCleared += 1;
+				rowIndexes.push(i);
 				ack.unshift(new Array<keyof PieceTypes>(newBoard[0].length).fill(''));
 				return ack;
 			}
@@ -292,32 +335,34 @@ export class Tstris<
 			return ack;
 		}, []);
 
-		this.dispatchEvent('rowCleared', { numCleared: rowsCleared, tSpin: false });
-		this.score += this.options.scoreFunction({
+		this.rowsCleared += rowsCleared;
+		dispatchEvent(this.events, 'rowCleared', {
+			totalRowsCleared: this.rowsCleared,
+			clearedThisPlace: rowsCleared,
+			rows: rowIndexes,
+			tSpin: false,
+		});
+
+		const newScore = this.options.scoreFunction({
 			rowsCleared,
 			level: this.level,
 			tSpin: false,
 		});
+		dispatchEvent(this.events, 'scoreChange', {
+			oldScore: this.score,
+			newScore: (this.score += newScore),
+		});
+
+		const newLevel = this.options.levelFunction({
+			totalRowsCleared: this.rowsCleared,
+			currLevel: this.level,
+		});
+		if (newLevel !== this.level) {
+			this.level = newLevel;
+			dispatchEvent(this.events, 'levelChange', { newLevel });
+		}
 
 		return withClearedRows;
-	}
-
-	/**
-	 * Calls callback for event wih prope arguments and default preventing
-	 * @param event Event name
-	 * @param args Arguments for specific event
-	 * @returns Whether or not the event's default was prevented
-	 */
-	private dispatchEvent<E extends keyof TstrisEventMap<PieceTypes>>(
-		event: E,
-		args: Omit<TstrisEventMap<PieceTypes>[E], 'preventDefault'>,
-	) {
-		let defaultPrevented = false;
-		const preventDefault = () => (defaultPrevented = true);
-
-		this.events.get(event)?.({ ...args, preventDefault } as any);
-
-		return defaultPrevented;
 	}
 
 	private generateDefaultBoard() {

@@ -47,6 +47,15 @@ var getRandomKey = (obj) => {
   return keys[Math.floor(Math.random() * keys.length)];
 };
 
+// src/Tstris/dispatchEvent.ts
+var dispatchEvent = (events, event, args) => {
+  var _a;
+  let defaultPrevented = false;
+  const preventDefault = () => defaultPrevented = true;
+  (_a = events.get(event)) == null ? void 0 : _a(__spreadProps(__spreadValues({}, args), { preventDefault }));
+  return defaultPrevented;
+};
+
 // src/Tstris/Player/Player.ts
 var Player = class {
   constructor(tstris, options, board) {
@@ -58,10 +67,14 @@ var Player = class {
     this.pos = { x: 0, y: 0 };
   }
   start() {
+    this.pos = { x: this.options.width / 2 - 2, y: 0 };
     this.currPiece = this.getRandomPiece();
     for (let i = 0; i < this.options.nextQueueSize; i += 1) {
       this.nextPieces[i] = this.getRandomPiece();
     }
+    dispatchEvent(this.tstris.getEventMap(), "queueChange", {
+      queue: this.nextPieces.map((piece) => piece.type)
+    });
   }
   reset() {
     this.heldPiece = void 0;
@@ -72,22 +85,42 @@ var Player = class {
   }
   resetPlayer({ afterHold = true }) {
     this.pos = { x: this.options.width / 2 - 2, y: 0 };
+    this.collided = false;
     if (!afterHold)
       this.currPiece = this.getNextPiece();
   }
   hold() {
+    var _a;
     if (!this.options.hold)
       return;
     if (!this.heldPiece) {
       this.heldPiece = this.currPiece;
       this.currPiece = this.getNextPiece();
-      return;
+    } else {
+      const tmp = this.heldPiece;
+      this.heldPiece = this.currPiece;
+      this.currPiece = tmp;
     }
-    const tmp = this.heldPiece;
-    this.heldPiece = this.currPiece;
-    this.currPiece = tmp;
     if (this.options.resetOnHold)
       this.resetPlayer({ afterHold: true });
+    dispatchEvent(this.tstris.getEventMap(), "hold", {
+      previous: this.currPiece.type,
+      next: (_a = this.heldPiece) == null ? void 0 : _a.type
+    });
+  }
+  rotatePiece(dir) {
+    this.currPiece.shape = this.rotate(this.currPiece.shape, dir);
+    const startingX = this.pos.x;
+    let offset = 1;
+    while (this.checkCollision({ x: 0, y: 0 })) {
+      this.pos.x += offset;
+      offset = -(offset + (offset > 0 ? 1 : -1));
+      if (offset > this.currPiece.shape[0].length) {
+        this.currPiece.shape = this.rotate(this.currPiece.shape, dir === "left" ? "right" : "left");
+        this.pos.x = startingX;
+        return;
+      }
+    }
   }
   updatePos({ x, y, collided }) {
     this.pos = { x: this.pos.x + x, y: this.pos.y + y };
@@ -132,12 +165,17 @@ var Player = class {
     const nextPiece = this.nextPieces.shift();
     if (this.options.nextQueueSize > 0)
       this.nextPieces.push(this.getRandomPiece());
-    return nextPiece != null ? nextPiece : this.getRandomPiece();
+    const returned = nextPiece != null ? nextPiece : this.getRandomPiece();
+    if (this.tstris.status === "playing")
+      dispatchEvent(this.tstris.getEventMap(), "queueChange", {
+        queue: this.nextPieces.map((piece) => piece.type)
+      });
+    return returned;
   }
   getRandomPiece() {
     const randPiece = getRandomKey(this.options.pieceTypes);
     return {
-      shape: this.options.pieceTypes[randPiece].shape,
+      shape: this.options.pieceTypes[randPiece].shape.map((row) => row.slice(0)),
       type: randPiece
     };
   }
@@ -201,6 +239,9 @@ var DEFAULT_SPEED_FUNCTION = () => {
 var DEFAULT_SCORE_FUNCTION = () => {
   return 10;
 };
+var DEFAULT_LEVEL_FUNCTION = () => {
+  return 1;
+};
 var DEFAULT_OPTIONS = {
   pieceTypes: DEFAULT_PIECE_TYPES,
   nextQueueSize: 3,
@@ -210,12 +251,14 @@ var DEFAULT_OPTIONS = {
   height: 20,
   speedFunction: DEFAULT_SPEED_FUNCTION,
   scoreFunction: DEFAULT_SCORE_FUNCTION,
+  levelFunction: DEFAULT_LEVEL_FUNCTION,
   startLevel: 1
 };
 var Tstris = class {
   constructor(options = {}) {
     this.lastLoopRun = 0;
     this.loopStatus = "stopped";
+    this.holdUsed = false;
     this.rowsCleared = 0;
     this.score = 0;
     this.status = "idle";
@@ -278,6 +321,24 @@ var Tstris = class {
     this.updateBoard();
     this.startLoop();
   }
+  hold() {
+    if (this.holdUsed || !this.options.hold)
+      return;
+    this.player.hold();
+    this.updateBoard();
+    this.holdUsed = true;
+  }
+  rotateRight() {
+    this.player.rotatePiece("right");
+    this.updateBoard();
+  }
+  rotateLeft() {
+    this.player.rotatePiece("left");
+    this.updateBoard();
+  }
+  getEventMap() {
+    return new Map(this.events);
+  }
   setBoard(value) {
     this.board = value;
     this.player.board = value;
@@ -295,8 +356,7 @@ var Tstris = class {
   gameLoop() {
     if (this.lastLoopRun > Date.now() - this.options.speedFunction(this.level))
       return;
-    const loopStart = Date.now();
-    const prevented = this.dispatchEvent("naturalDrop", { cell: true });
+    const prevented = dispatchEvent(this.events, "naturalDrop", { cell: true });
     if (prevented)
       return;
     const ended = this.player.drop();
@@ -304,43 +364,59 @@ var Tstris = class {
     if (ended) {
       return this.end();
     }
-    console.log("loop time:", Date.now() - loopStart);
     this.lastLoopRun = Date.now();
   }
   updateBoard() {
     if (this.player.collided) {
+      dispatchEvent(this.events, "piecePlaced", {
+        type: this.player.currPiece.type
+      });
       this.setBoard(this.handleClearedRows(this.getBoardWithPlayer()));
       this.player.resetPlayer({ afterHold: false });
+      this.holdUsed = false;
     } else {
       this.setBoard(this.getBoard());
     }
-    this.dispatchEvent("update", {});
+    dispatchEvent(this.events, "update", {});
   }
   handleClearedRows(newBoard) {
     let rowsCleared = 0;
-    const withClearedRows = newBoard.reduce((ack, row) => {
+    const rowIndexes = [];
+    const withClearedRows = newBoard.reduce((ack, row, i) => {
       if (row.findIndex((cell) => cell === "") === -1) {
         rowsCleared += 1;
+        rowIndexes.push(i);
         ack.unshift(new Array(newBoard[0].length).fill(""));
         return ack;
       }
       ack.push(row);
       return ack;
     }, []);
-    this.dispatchEvent("rowCleared", { numCleared: rowsCleared, tSpin: false });
-    this.score += this.options.scoreFunction({
+    this.rowsCleared += rowsCleared;
+    dispatchEvent(this.events, "rowCleared", {
+      totalRowsCleared: this.rowsCleared,
+      clearedThisPlace: rowsCleared,
+      rows: rowIndexes,
+      tSpin: false
+    });
+    const newScore = this.options.scoreFunction({
       rowsCleared,
       level: this.level,
       tSpin: false
     });
+    dispatchEvent(this.events, "scoreChange", {
+      oldScore: this.score,
+      newScore: this.score += newScore
+    });
+    const newLevel = this.options.levelFunction({
+      totalRowsCleared: this.rowsCleared,
+      currLevel: this.level
+    });
+    if (newLevel !== this.level) {
+      this.level = newLevel;
+      dispatchEvent(this.events, "levelChange", { newLevel });
+    }
     return withClearedRows;
-  }
-  dispatchEvent(event, args) {
-    var _a;
-    let defaultPrevented = false;
-    const preventDefault = () => defaultPrevented = true;
-    (_a = this.events.get(event)) == null ? void 0 : _a(__spreadProps(__spreadValues({}, args), { preventDefault }));
-    return defaultPrevented;
   }
   generateDefaultBoard() {
     return Array.from(Array(this.options.height), () => new Array(this.options.width).fill(""));

@@ -1,3 +1,14 @@
+.container {
+	display: flex;
+}
+
+#hold {
+	background-color: #333;
+	width: 50px;
+	height: 60px;
+	color: white;
+}
+
 #board {
 	display: grid;
 	grid-template-rows: repeat(20, calc(25vw / 10));

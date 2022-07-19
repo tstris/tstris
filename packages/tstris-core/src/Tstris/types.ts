@@ -17,11 +17,15 @@ export interface TstrisOptions<PieceTypes extends Record<string, PieceTypeDefini
 	/** Height of game board, defaults to 20 */
 	height?: number;
 	/**
+	 * Function which determines what the level should be, default is provided and exported
+	 */
+	levelFunction?: (args: { totalRowsCleared: number; currLevel: number }) => number;
+	/**
 	 * Function which determines game speed from current level in ms (lower is faster), default is provided and exported
 	 */
 	speedFunction?: (level: number) => number;
 	/**
-	 * Function called whenever rows are cleared in order to determine how much they are worth
+	 * Function called whenever rows are cleared in order to determine how much they are worth, default is provided and exported
 	 */
 	scoreFunction?: (args: { rowsCleared: number; level: number; tSpin: boolean }) => number;
 	/** How many pieces ahead are shown to player, defaults to 3 */
@@ -45,6 +49,7 @@ export type HasDefault =
 	| 'startLevel'
 	| 'speedFunction'
 	| 'scoreFunction'
+	| 'levelFunction'
 	| 'nextQueueSize'
 	| 'hold'
 	| 'resetOnHold';
@@ -68,6 +73,16 @@ export type TstrisEvent<
 
 export interface TstrisEventMap<PieceTypes extends Record<string, PieceTypeDefinition<string>>> {
 	naturalDrop: TstrisEvent<PieceTypes, { cell: boolean }>;
-	rowCleared: TstrisEvent<PieceTypes, { numCleared: number; tSpin: boolean }>;
+	rowCleared: TstrisEvent<
+		PieceTypes,
+		{ totalRowsCleared: number; clearedThisPlace: number; rows: number[]; tSpin: boolean }
+	>;
 	update: TstrisEvent<PieceTypes>;
+	start: TstrisEvent<PieceTypes>;
+	end: TstrisEvent<PieceTypes>;
+	hold: TstrisEvent<PieceTypes, { previous: keyof PieceTypes; next: keyof PieceTypes }>;
+	piecePlaced: TstrisEvent<PieceTypes, { type: keyof PieceTypes }>;
+	queueChange: TstrisEvent<PieceTypes, { queue: (keyof PieceTypes)[] }>;
+	levelChange: TstrisEvent<PieceTypes, { newLevel: number }>;
+	scoreChange: TstrisEvent<PieceTypes, { oldScore: number; newScore: number }>;
 }

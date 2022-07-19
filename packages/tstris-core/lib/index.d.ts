@@ -10,11 +10,18 @@ interface TstrisOptions<PieceTypes extends Record<string, PieceTypeDefinition<st
     /** Height of game board, defaults to 20 */
     height?: number;
     /**
+     * Function which determines what the level should be, default is provided and exported
+     */
+    levelFunction?: (args: {
+        totalRowsCleared: number;
+        currLevel: number;
+    }) => number;
+    /**
      * Function which determines game speed from current level in ms (lower is faster), default is provided and exported
      */
     speedFunction?: (level: number) => number;
     /**
-     * Function called whenever rows are cleared in order to determine how much they are worth
+     * Function called whenever rows are cleared in order to determine how much they are worth, default is provided and exported
      */
     scoreFunction?: (args: {
         rowsCleared: number;
@@ -42,10 +49,31 @@ interface TstrisEventMap<PieceTypes extends Record<string, PieceTypeDefinition<s
         cell: boolean;
     }>;
     rowCleared: TstrisEvent<PieceTypes, {
-        numCleared: number;
+        totalRowsCleared: number;
+        clearedThisPlace: number;
+        rows: number[];
         tSpin: boolean;
     }>;
     update: TstrisEvent<PieceTypes>;
+    start: TstrisEvent<PieceTypes>;
+    end: TstrisEvent<PieceTypes>;
+    hold: TstrisEvent<PieceTypes, {
+        previous: keyof PieceTypes;
+        next: keyof PieceTypes;
+    }>;
+    piecePlaced: TstrisEvent<PieceTypes, {
+        type: keyof PieceTypes;
+    }>;
+    queueChange: TstrisEvent<PieceTypes, {
+        queue: (keyof PieceTypes)[];
+    }>;
+    levelChange: TstrisEvent<PieceTypes, {
+        newLevel: number;
+    }>;
+    scoreChange: TstrisEvent<PieceTypes, {
+        oldScore: number;
+        newScore: number;
+    }>;
 }
 
 /**
@@ -61,6 +89,7 @@ declare class Tstris<PieceTypes extends Record<string | '', PieceTypeDefinition<
     /** setInterval id */
     private interval?;
     private loopStatus;
+    holdUsed: boolean;
     level: number;
     rowsCleared: number;
     score: number;
@@ -105,7 +134,39 @@ declare class Tstris<PieceTypes extends Record<string | '', PieceTypeDefinition<
     moveLeft(): void;
     /** Moves player down 1 cell and checks if they lost the game */
     softDrop(): void;
-    /** Ensure this instance and its player use same reference */
+    /** Switches current piece with held piece or places current piece in hold and gets next piece */
+    hold(): void;
+    /** Rotates current piece to the right */
+    rotateRight(): void;
+    /** Rotates current piece to the left */
+    rotateLeft(): void;
+    getEventMap(): Map<keyof TstrisEventMap<PieceTypes>, (arg: {
+        preventDefault: () => void;
+    } | TstrisEvent<PieceTypes, {
+        previous: keyof PieceTypes;
+        next: keyof PieceTypes;
+    }> | TstrisEvent<PieceTypes, {
+        cell: boolean;
+    }> | TstrisEvent<PieceTypes, {
+        totalRowsCleared: number;
+        clearedThisPlace: number;
+        rows: number[];
+        tSpin: boolean;
+    }> | TstrisEvent<PieceTypes, {
+        type: keyof PieceTypes;
+    }> | TstrisEvent<PieceTypes, {
+        queue: (keyof PieceTypes)[];
+    }> | TstrisEvent<PieceTypes, {
+        newLevel: number;
+    }> | TstrisEvent<PieceTypes, {
+        oldScore: number;
+        newScore: number;
+    }>) => void>;
+    /**
+     * Ensure this instance and its player use same reference
+     *
+     * **For Internal use only**
+     */
     private setBoard;
     /** Starts game loop if it isn't running */
     private startLoop;
@@ -116,13 +177,6 @@ declare class Tstris<PieceTypes extends Record<string | '', PieceTypeDefinition<
     private updateBoard;
     /** Finds cleared rows and replaces them, also dispatches rowCleared event and calls scoreFunction */
     private handleClearedRows;
-    /**
-     * Calls callback for event wih prope arguments and default preventing
-     * @param event Event name
-     * @param args Arguments for specific event
-     * @returns Whether or not the event's default was prevented
-     */
-    private dispatchEvent;
     private generateDefaultBoard;
 }
 
