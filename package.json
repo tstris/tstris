@@ -1,6 +1,6 @@
 {
 	"name": "tstris",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"license": "MIT",
 	"author": "Isaiah Gamble <itg.2048@gmail.com>",
 	"description": "Tstris monorepo",

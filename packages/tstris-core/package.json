@@ -1,6 +1,6 @@
 {
 	"name": "@tstris/core",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Low level implementation of t*tris for browser and node.js",
 	"license": "MIT",
 	"author": "Isaiah Gamble <itg.2048@gmail.com>",
