@@ -1,11 +1,3 @@
 # tstris-core
 
-This library was generated with [Nx](https://nx.dev).
-
-## Running unit tests
-
-Run `nx test tstris-core` to execute the unit tests via [Jest](https://jestjs.io).
-
-## Running lint
-
-Run `nx lint tstris-core` to execute the lint via [ESLint](https://eslint.org/).
+The core package for tstris. This contains low level implementation details and all library specific bindings depend on it. Look at the root repository README for more information on usage or check out examples/vanilla for an example using core raw.
