@@ -1,7 +1,12 @@
 {
 	"name": "@tstris/core",
-	"version": "0.1.1",
-	"description": "Low level implementation of t*tris for browser and node.js",
+	"version": "0.1.2",
+	"description": "Low level implementation of block puzzle games for browser and node.js",
+	"repository": {
+		"url": "https://github.com/tstris/tstris",
+		"type": "git"
+	},
+	"homepage": "https://github.com/tstris/tstris#readme",
 	"license": "MIT",
 	"author": "Isaiah Gamble <itg.2048@gmail.com>",
 	"types": "./lib/index.d.ts",
@@ -14,7 +19,12 @@
 		"build": "tsup",
 		"dev": "tsup --watch --out-dir ./lib"
 	},
-	"keywords": [],
+	"keywords": [
+		"puzzle",
+		"game",
+		"game engine",
+		"browser"
+	],
 	"devDependencies": {
 		"eslint-config-tstris": "*",
 		"tsup": "6.1.3",
