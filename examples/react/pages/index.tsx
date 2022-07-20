@@ -2,6 +2,7 @@ import {
 	Box,
 	Button,
 	Container,
+	Grid,
 	Group,
 	Paper,
 	SimpleGrid,
@@ -11,25 +12,25 @@ import {
 } from '@mantine/core';
 import { Center } from '@mantine/core';
 import { useTstris } from '@/../../packages/tstris-react';
-import { DefaultPieceTypes } from '@/../../packages/tstris-core';
+import { DefaultPieceTypes, DEFAULT_PIECE_TYPES } from '@/../../packages/tstris-core';
 import { KeyboardEventHandler, memo } from 'react';
 import { useFocusTrap } from '@mantine/hooks';
 
 const getPieceColor = (piece: DefaultPieceTypes) => {
 	if (piece == 'I') {
-		return 'turquoise';
+		return '#40E0D0';
 	} else if (piece == 'O') {
-		return 'yellow';
+		return '#FFFF00';
 	} else if (piece == 'J') {
-		return 'blue';
+		return '#0000FF';
 	} else if (piece == 'L') {
-		return 'orange';
+		return '#FFA500';
 	} else if (piece == 'T') {
-		return 'purple';
+		return '#800080';
 	} else if (piece == 'Z') {
-		return 'red';
+		return '#FF0000';
 	} else if (piece == 'S') {
-		return 'green';
+		return '#008000';
 	} else {
 		return 'transparent';
 	}
@@ -50,12 +51,16 @@ const Cell = memo(({ piece, size }: { piece: DefaultPieceTypes; size: number }) 
 			})}
 		>
 			<Box
-				sx={{
-					border: color !== 'transparent' ? `10px outset ${color}` : undefined,
+				sx={(theme) => ({
+					border: color !== 'transparent' ? `${size / 5}px outset ${color}` : undefined,
+					borderTopColor:
+						color !== 'transparent' ? theme.fn.lighten(color, 0.2) : undefined,
+					borderLeftColor:
+						color !== 'transparent' ? theme.fn.lighten(color, 0.2) : undefined,
 					backgroundColor: getPieceColor(piece),
 					width: size,
 					height: size,
-				}}
+				})}
 			></Box>
 		</Box>
 	);
@@ -82,6 +87,22 @@ const Board = ({
 	);
 };
 
+const RenderPiece = ({ shape }: { shape: DefaultPieceTypes[][] }) => {
+	return (
+		<Grid gutter={0} columns={shape.length}>
+			{shape.map((row, y) => (
+				<Grid.Col span={1} key={y}>
+					{row.map((_, x) => {
+						const piece = shape[x][y];
+
+						return <Cell key={x} piece={piece} size={30} />;
+					})}
+				</Grid.Col>
+			))}
+		</Grid>
+	);
+};
+
 const Page = () => {
 	const {
 		boardWPlayer,
@@ -101,25 +122,25 @@ const Page = () => {
 			<Button mb='md' onClick={() => toggleColorScheme()}>
 				Toggle Color Scheme
 			</Button>
-			<Container>
-				<Group align='start'>
+			<Container size='xl'>
+				<Group sx={{ width: '100%' }} align='start'>
 					<Paper>
 						<Text component='h1' sx={{ fontSize: 40 }}>
 							Hold
 						</Text>
-						{heldPiece}
+						{heldPiece && <RenderPiece shape={DEFAULT_PIECE_TYPES[heldPiece].shape} />}
 					</Paper>
 					<Board board={boardWPlayer} onKeyDown={moveHandler} />
-					<Stack align='center'>
+					<Stack sx={{ width: 300 }} align='center'>
 						<Text component='h1' sx={{ fontSize: 40 }}>
 							Info
 						</Text>
 						<Text component='h2' sx={{ fontSize: 28 }}>
 							Next
 						</Text>
-						<Stack>
+						<Stack sx={{ width: '100%' }} align='center'>
 							{nextQueue?.map((piece, i) => (
-								<p key={i}>{piece}</p>
+								<RenderPiece key={i} shape={DEFAULT_PIECE_TYPES[piece].shape} />
 							))}
 						</Stack>
 						<Text component='h2' sx={{ fontSize: 28 }}>

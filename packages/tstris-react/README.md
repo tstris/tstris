@@ -4,7 +4,9 @@ Bindings for tstris through react hooks.
 
 ## Installation
 
-```bash npm install @tstris/core @tstris/react```
+```bash
+npm install @tstris/core @tstris/react
+```
 
 ## Usage
 

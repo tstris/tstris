@@ -24,12 +24,19 @@ export class Player<PieceTypes extends Record<string, PieceTypeDefinition<string
 		this.pos = { x: this.options.width / 2 - 2, y: 0 };
 		this.currPiece = this.getRandomPiece();
 
+		const previousHeld = this.heldPiece?.type;
+		this.heldPiece = undefined;
+
 		// populate next queue
 		for (let i = 0; i < this.options.nextQueueSize; i += 1) {
 			this.nextPieces[i] = this.getRandomPiece();
 		}
 		dispatchEvent(this.tstris.getEventMap(), 'queueChange', {
 			queue: this.nextPieces.map((piece) => piece.type) as string[],
+		});
+		dispatchEvent(this.tstris.getEventMap(), 'hold', {
+			next: undefined,
+			previous: previousHeld as string,
 		});
 	}
 

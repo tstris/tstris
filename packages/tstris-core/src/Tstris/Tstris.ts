@@ -9,7 +9,10 @@ import {
 	DefaultOptions,
 } from './types';
 
-export const DEFAULT_PIECE_TYPES = {
+export const DEFAULT_PIECE_TYPES: Record<
+	DefaultPieceTypes,
+	PieceTypeDefinition<DefaultPieceTypes>
+> = {
 	I: {
 		shape: [
 			['', '', '', ''],

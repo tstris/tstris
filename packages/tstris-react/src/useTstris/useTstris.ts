@@ -1,12 +1,12 @@
 import { KeyboardEventHandler, useEffect, useRef, useState } from 'react';
-import { PieceTypeDefinition, Tstris, TstrisEventMap, TstrisOptions } from '@tstris/core';
+import { DefaultPieceTypes, PieceTypeDefinition, Tstris, TstrisEventMap, TstrisOptions } from '@tstris/core';
 import { UseTstrisReturn } from './types';
 
 /** Default move handler for easy implementation */
 
 
 // eslint-disable-next-line prettier/prettier
-export const useTstris = <PieceTypes extends Record<string, PieceTypeDefinition<string>>>(
+export const useTstris = <PieceTypes extends Record<string, PieceTypeDefinition<string>> = Record<DefaultPieceTypes, PieceTypeDefinition<DefaultPieceTypes>>>(
 	options?: TstrisOptions<PieceTypes>,
 	constructor: typeof Tstris<PieceTypes> = Tstris,
 ): UseTstrisReturn<PieceTypes> => {
@@ -50,7 +50,7 @@ export const useTstris = <PieceTypes extends Record<string, PieceTypeDefinition<
 				setLevel(instance.current.level);
 			},
 			hold:({ next }) => {
-				setHeldPiece(next);
+				setHeldPiece(next ?? null);
 			},
 			statusChange:({ newStatus }) => {
 				setStatus(newStatus);

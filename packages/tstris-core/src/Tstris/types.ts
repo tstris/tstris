@@ -1,6 +1,6 @@
 import { Tstris } from './Tstris';
 
-export type DefaultPieceTypes = 'O' | 'I' | 'J' | 'L' | 'Z' | 'S' | 'T' | '';
+export type DefaultPieceTypes = 'O' | 'I' | 'J' | 'L' | 'Z' | 'S' | 'T';
 
 export type PieceTypeDefinition<T extends string, E extends object = {}> = {
 	shape: (T | '')[][];
@@ -85,7 +85,10 @@ export interface TstrisEventMap<PieceTypes extends Record<string, PieceTypeDefin
 	update: TstrisEvent<PieceTypes>;
 	start: TstrisEvent<PieceTypes>;
 	end: TstrisEvent<PieceTypes>;
-	hold: TstrisEvent<PieceTypes, { previous: keyof PieceTypes; next: keyof PieceTypes }>;
+	hold: TstrisEvent<
+		PieceTypes,
+		{ previous: keyof PieceTypes | undefined; next: keyof PieceTypes | undefined }
+	>;
 	piecePlaced: TstrisEvent<PieceTypes, { type: keyof PieceTypes }>;
 	queueChange: TstrisEvent<PieceTypes, { queue: (keyof PieceTypes)[] }>;
 	levelChange: TstrisEvent<PieceTypes, { newLevel: number }>;

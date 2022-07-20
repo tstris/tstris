@@ -4,7 +4,9 @@ A headless, zero dependency, implementation of a falling block puzzle game. You 
 
 ## Installation
 
-```bash npm install @tstris/core```
+```bash
+npm install @tstris/core
+```
 
 ## Usage
 
