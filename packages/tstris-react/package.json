@@ -1,6 +1,6 @@
 {
 	"name": "@tstris/react",
-	"version": "0.1.4",
+	"version": "0.2.0",
 	"description": "Binding for react to make using tstris easier.",
 	"repository": {
 		"url": "https://github.com/tstris/tstris",
@@ -37,7 +37,7 @@
 		"react-dom": "18.2.0"
 	},
 	"peerDependencies": {
-		"@tstris/core": "0.1.4",
+		"@tstris/core": "0.2.0",
 		"react": ">=16.8.0",
 		"react-dom": ">=16.8.0"
 	}

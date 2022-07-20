@@ -1,10 +1,10 @@
 # Tstris
 
-A headless, zero dependency, implementation of a falling block puzzle game. You bring your own ui library and can use the raw core library or use library specific bindings. It is compatible with both common JS and ES Modules and is built in ES6.
+A headless, zero dependency, implementation of a falling block puzzle game. You bring your own ui library and can use the raw core library or use library specific bindings. It is compatible with both commonJS and ES Modules and is built in ES6.
 
 ## Installation
 
-`npm install @tstris/core`
+```bash npm install @tstris/core```
 
 ## Usage
 
@@ -15,16 +15,16 @@ const tstris = new Tstris();
 
 // Attach event listeners to instance...
 tstris.on('update', () => {
-    const newBoard = tstris.getBoardWithPlayer();
+	const newBoard = tstris.getBoardWithPlayer();
 
-    // ...render board
+	// ...render board
 });
 
 // Starts game
 tstris.start();
 ```
 
-The simple implementation above will be able to show pieces dropping
+The vanilla JS implementation above will be able to show pieces dropping. For a more detailed implementation, check examples/vanilla.
 
 ## Examples
 

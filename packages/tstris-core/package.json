@@ -1,6 +1,6 @@
 {
 	"name": "@tstris/core",
-	"version": "0.1.4",
+	"version": "0.2.0",
 	"description": "Low level implementation of block puzzle games for browser and node.js.",
 	"repository": {
 		"url": "https://github.com/tstris/tstris",

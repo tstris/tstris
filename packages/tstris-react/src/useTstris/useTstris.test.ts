@@ -18,11 +18,11 @@ describe('useTstris', () => {
 
 	it('Should react to events being fired in the game.', () => {
 		const { result } = renderHook(() => useTstris());
-		const startingBoard = result.current.board;
+		const startingBoard = result.current.boardWPlayer;
 		act(() => {
 			result.current.tstris.start();
 			result.current.tstris.softDrop();
 		});
-		expect(result.current.board).not.toEqual(startingBoard);
+		expect(result.current.boardWPlayer).not.toEqual(startingBoard);
 	});
 });
