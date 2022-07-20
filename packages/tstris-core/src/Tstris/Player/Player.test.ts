@@ -4,7 +4,7 @@ import { Player } from './Player';
 
 describe('Tstris Player', () => {
 	let tstris: Tstris;
-	let player: Player<Record<DefaultPieceTypes, PieceTypeDefinition<DefaultPieceTypes>>>;
+	let player: Player<Record<DefaultPieceTypes | '', PieceTypeDefinition<DefaultPieceTypes | ''>>>;
 
 	beforeEach(() => {
 		tstris = new Tstris();

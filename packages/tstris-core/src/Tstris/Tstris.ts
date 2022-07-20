@@ -100,8 +100,8 @@ export const DEFAULT_OPTIONS: DefaultOptions<
  */
 export class Tstris<
 	PieceTypes extends Record<string | '', PieceTypeDefinition<string>> = Record<
-		DefaultPieceTypes,
-		PieceTypeDefinition<DefaultPieceTypes>
+		DefaultPieceTypes | '',
+		PieceTypeDefinition<DefaultPieceTypes | ''>
 	>,
 > {
 	private events: Map<
