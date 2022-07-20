@@ -5,7 +5,7 @@ export default {
 	projects: getJestProjects(),
 	globals: {
 		'ts-jest': {
-			isolatedModules: true
-		}
-	}
+			isolatedModules: true,
+		},
+	},
 } as InitialOptionsTsJest;

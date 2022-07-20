@@ -1,3 +1,5 @@
+import { Tstris } from './Tstris';
+
 export type DefaultPieceTypes = 'O' | 'I' | 'J' | 'L' | 'Z' | 'S' | 'T' | '';
 
 export type PieceTypeDefinition<T extends string, E extends object = {}> = {
@@ -88,4 +90,5 @@ export interface TstrisEventMap<PieceTypes extends Record<string, PieceTypeDefin
 	queueChange: TstrisEvent<PieceTypes, { queue: (keyof PieceTypes)[] }>;
 	levelChange: TstrisEvent<PieceTypes, { newLevel: number }>;
 	scoreChange: TstrisEvent<PieceTypes, { oldScore: number; newScore: number }>;
+	statusChange: TstrisEvent<PieceTypes, { newStatus: Tstris['status'] }>;
 }

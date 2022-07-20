@@ -103,7 +103,7 @@ export class Tstris<
 > {
 	private events: Map<
 		keyof TstrisEventMap<PieceTypes>,
-		(arg: TstrisEventMap<PieceTypes>[keyof TstrisEventMap<PieceTypes>]) => void
+		((arg: TstrisEventMap<PieceTypes>[keyof TstrisEventMap<PieceTypes>]) => void)[]
 	>;
 	private board: (keyof PieceTypes)[][];
 	private player: Player<PieceTypes>;
@@ -144,6 +144,7 @@ export class Tstris<
 		this.player.start();
 		this.startLoop();
 		this.status = 'playing';
+		dispatchEvent(this.events, 'statusChange', { newStatus: 'playing' });
 	}
 
 	/**
@@ -154,6 +155,7 @@ export class Tstris<
 		this.status = 'ended';
 		this.stopLoop();
 		if (reset) this.reset();
+		dispatchEvent(this.events, 'statusChange', { newStatus: 'ended' });
 	}
 
 	/** Resets board and player and sets status to "idle" but does not stop loop */
@@ -161,6 +163,7 @@ export class Tstris<
 		this.player.reset();
 		this.setBoard(this.options.defaultBoard || this.generateDefaultBoard());
 		this.status = 'idle';
+		dispatchEvent(this.events, 'statusChange', { newStatus: 'idle' });
 	}
 
 	/**
@@ -172,15 +175,27 @@ export class Tstris<
 		event: E,
 		cb: (args: Pick<TstrisEventMap<PieceTypes>, E>[E]) => void,
 	) {
-		this.events.set(event, cb as any);
+		const registeredEvents = this.events.get(event);
+		if (registeredEvents) {
+			registeredEvents.push(cb as any);
+		} else {
+			this.events.set(event, [cb as any]);
+		}
 	}
 
 	/**
 	 * Remove event an event listener from game instance
 	 * @param event Event to remove event listener for
 	 */
-	off<E extends keyof TstrisEventMap<PieceTypes>>(event: E) {
-		this.events.delete(event);
+	off<E extends keyof TstrisEventMap<PieceTypes>>(
+		event: E,
+		cb: (args: Pick<TstrisEventMap<PieceTypes>, E>[E]) => void,
+	) {
+		const registeredEvents = this.events.get(event);
+		if (registeredEvents) {
+			const removeIndex = registeredEvents.findIndex((listener) => listener === cb);
+			registeredEvents.splice(removeIndex, 1);
+		}
 	}
 
 	/**
@@ -234,11 +249,18 @@ export class Tstris<
 
 	/** Moves player down and instantly places piece */
 	hardDrop() {
-		while (this.player.collided <= 0) {
-			if (this.player.drop()) this.end();
+		let counter = 1;
+		// When we collide we know that counter -1 is correct y coord
+		while (!this.player.checkCollision({ x: 0, y: counter })) {
+			counter += 1;
 		}
+
+		if (counter <= 1 && this.player.pos.y <= 0) {
+			return this.end();
+		}
+
 		// set to placement threshold immediately
-		this.player.collided = this.options.placementCollisions;
+		this.player.updatePos({ x: 0, y: counter - 1, collided: this.options.placementCollisions });
 		this.updateBoard();
 		this.resetLoop();
 	}

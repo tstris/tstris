@@ -1,20 +1,20 @@
 {
 	"$schema": "../../node_modules/nx/schemas/project-schema.json",
-	"sourceRoot": "packages/tstris-core/src",
+	"sourceRoot": "packages/tstris-react/src",
 	"projectType": "library",
 	"targets": {
 		"build": {
 			"executor": "nx:run-script",
 			"options": {
 				"script": "build",
-				"outputPath": "dist/packages/tstris-core"
+				"outputPath": "dist/packages/tstris-react"
 			},
-			"outputs": ["dist/packages/tstris-core/lib"]
+			"outputs": ["dist/packages/tstris-react/lib"]
 		},
 		"publish": {
 			"executor": "@nrwl/workspace:run-commands",
 			"options": {
-				"command": "tsx tools/scripts/publish.mjs tstris-core {args.ver} {args.tag} {args.otp}"
+				"command": "tsx tools/scripts/publish.mjs tstris-react {args.ver} {args.tag} {args.otp}"
 			},
 			"dependsOn": [
 				{
@@ -28,20 +28,20 @@
 			"options": {
 				"script": "dev"
 			},
-			"outputs": ["packages/tstris-core/lib"]
+			"outputs": ["packages/tstris-react/lib"]
 		},
 		"lint": {
 			"executor": "@nrwl/linter:eslint",
 			"outputs": ["{options.outputFile}"],
 			"options": {
-				"lintFilePatterns": ["packages/tstris-core/**/*.ts"]
+				"lintFilePatterns": ["packages/tstris-react/**/*.ts"]
 			}
 		},
 		"test": {
 			"executor": "@nrwl/jest:jest",
-			"outputs": ["coverage/packages/tstris-core"],
+			"outputs": ["coverage/packages/tstris-react"],
 			"options": {
-				"jestConfig": "packages/tstris-core/jest.config.ts",
+				"jestConfig": "packages/tstris-react/jest.config.ts",
 				"passWithNoTests": true
 			}
 		}

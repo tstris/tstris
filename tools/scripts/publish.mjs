@@ -43,6 +43,9 @@ process.chdir(outputPath);
 try {
 	const json = JSON.parse(readFileSync(`package.json`).toString());
 	json.version = version;
+	if (json.peerDependencies) {
+		if (json.peerDependencies['@tstris/core']) json.peerDependencies['@tstris/core'] = version;
+	}
 	writeFileSync(`package.json`, JSON.stringify(json, null, '\t'));
 } catch (e) {
 	console.error(chalk.bold.red(`Error reading package.json file from library build output.`));

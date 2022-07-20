@@ -15,7 +15,8 @@
 		"skipDefaultLibCheck": true,
 		"baseUrl": ".",
 		"paths": {
-			"@tstris/core": ["packages/tstris-core/src/index.ts"]
+			"@tstris/core": ["packages/tstris-core/src/index.ts"],
+			"@tstris/react": ["packages/tstris-react/src/index.ts"]
 		}
 	},
 	"exclude": ["node_modules", "tmp"]

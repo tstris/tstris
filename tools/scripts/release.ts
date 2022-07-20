@@ -1,4 +1,3 @@
-import { execAsync } from './utils/execAsync';
 import packages from '../../package-manifest.json';
 packages as string[];
 import yargs from 'yargs';
@@ -74,7 +73,9 @@ const argv = yargs(hideBin(process.argv))
 	// clear old build results
 	try {
 		rmdirSync('dist');
-	} catch (e) {}
+	} catch (e) {
+		void 0; // noop
+	}
 
 	const builds = args.skipBuild
 		? []
@@ -112,6 +113,10 @@ const argv = yargs(hideBin(process.argv))
 	try {
 		const json = JSON.parse(readFileSync(`package.json`).toString());
 		json.version = version;
+		if (json.peerDependencies) {
+			if (json.peerDependencies['@tstris/core'])
+				json.peerDependencies['@tstris/core'] = version;
+		}
 		writeFileSync(`package.json`, JSON.stringify(json, null, '\t'));
 	} catch (e) {
 		console.error(chalk.bold.red(`Error reading root package.json.`));
@@ -125,6 +130,10 @@ const argv = yargs(hideBin(process.argv))
 				readFileSync(`packages/${packageName}/package.json`).toString(),
 			);
 			json.version = version;
+			if (json.peerDependencies) {
+				if (json.peerDependencies['@tstris/core'])
+					json.peerDependencies['@tstris/core'] = version;
+			}
 			writeFileSync(`packages/${packageName}/package.json`, JSON.stringify(json, null, '\t'));
 		} catch (e) {
 			console.error(chalk.bold.red(`Error reading ${packageName} package.json.`));
