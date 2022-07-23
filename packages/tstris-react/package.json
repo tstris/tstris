@@ -28,14 +28,14 @@
 		"react"
 	],
 	"devDependencies": {
-		"@testing-library/react": "^13.3.0",
+		"@testing-library/react": "13.3.0",
+		"@tstris/core": "*",
 		"@types/react": "18.0.15",
 		"eslint-config-tstris": "*",
-		"tsup": "6.1.3",
-		"typescript": "~4.7.2",
-		"@tstris/core": "*",
 		"react": "18.2.0",
-		"react-dom": "18.2.0"
+		"react-dom": "18.2.0",
+		"tsup": "6.1.3",
+		"typescript": "~4.7.2"
 	},
 	"peerDependencies": {
 		"@tstris/core": "0.2.1",
