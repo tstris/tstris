@@ -1,5 +1,6 @@
 import { renderHook, cleanup, act } from '@testing-library/react';
 import { useTstris } from './useTstris';
+import { describe, it, afterEach, expect } from 'vitest';
 
 describe('useTstris', () => {
 	afterEach(cleanup);

@@ -1,4 +1,5 @@
 import { DEFAULT_OPTIONS, Tstris } from './Tstris';
+import { describe, it, beforeEach, expect } from 'vitest';
 
 describe('Tstris', () => {
 	let tstris: Tstris;

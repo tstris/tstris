@@ -17,7 +17,8 @@
 	],
 	"scripts": {
 		"build": "tsup",
-		"dev": "tsup --watch --out-dir ./lib"
+		"dev": "tsup --watch --out-dir ./lib",
+		"test": "vitest run"
 	},
 	"keywords": [
 		"puzzle",

@@ -1,6 +1,7 @@
 import { DEFAULT_PIECE_TYPES, Tstris } from '../Tstris';
 import { DefaultPieceTypes, PieceTypeDefinition } from '../types';
 import { Player } from './Player';
+import { describe, it, beforeEach, expect } from 'vitest';
 
 describe('Tstris Player', () => {
 	let tstris: Tstris;

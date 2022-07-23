@@ -38,11 +38,9 @@
 			}
 		},
 		"test": {
-			"executor": "@nrwl/jest:jest",
-			"outputs": ["coverage/packages/tstris-react"],
+			"executor": "nx:run-script",
 			"options": {
-				"jestConfig": "packages/tstris-react/jest.config.ts",
-				"passWithNoTests": true
+				"script": "test"
 			}
 		}
 	},
